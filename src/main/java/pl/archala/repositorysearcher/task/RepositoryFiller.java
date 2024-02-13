@@ -1,4 +1,4 @@
-package pl.archala.repositorysearcher.service;
+package pl.archala.repositorysearcher.task;
 
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;

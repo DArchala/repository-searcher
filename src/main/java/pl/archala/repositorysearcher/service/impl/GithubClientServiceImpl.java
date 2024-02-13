@@ -1,4 +1,4 @@
-package pl.archala.repositorysearcher.service;
+package pl.archala.repositorysearcher.service.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -7,6 +7,9 @@ import pl.archala.repositorysearcher.dto.UserRepoDTO;
 import pl.archala.repositorysearcher.exception.GithubUserNotFoundException;
 import pl.archala.repositorysearcher.exception.InternalServerException;
 import pl.archala.repositorysearcher.model.GithubUser;
+import pl.archala.repositorysearcher.model.Repository;
+import pl.archala.repositorysearcher.service.GithubClientService;
+import pl.archala.repositorysearcher.task.RepositoryFiller;
 import pl.archala.repositorysearcher.utils.HttpRequestExecutor;
 import pl.archala.repositorysearcher.utils.HttpUtils;
 
@@ -17,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 public class GithubClientServiceImpl implements GithubClientService {
@@ -46,15 +50,15 @@ public class GithubClientServiceImpl implements GithubClientService {
         return new GithubUser(username, Arrays.asList(gson.fromJson(response.body(), UserRepoDTO[].class)));
     }
 
-    private void completeUserBranches(GithubUser user) {
+    private void completeUserBranches(GithubUser user) throws InternalServerException {
         try (ExecutorService e = Executors.newVirtualThreadPerTaskExecutor()) {
             List<RepositoryFiller> tasks = user.getRepositories().stream().map(repo -> new RepositoryFiller(httpRequestExecutor, gson, user.getOwnerLogin(), repo)).toList();
             user.getRepositories().clear();
-            for (var result : e.invokeAll(tasks)) {
+            for (Future<Repository> result : e.invokeAll(tasks)) {
                 user.getRepositories().add(result.get());
             }
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+            throw new InternalServerException(e.getMessage());
         }
     }
 
