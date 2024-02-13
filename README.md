@@ -12,13 +12,13 @@
 
 ## How to run using Docker?
 
-1. Build docker image:
+1. Build docker image:  
 docker build -t repository-searcher:latest .
 
-2. Run docker container:
-docker run --name repository-searcher -d -p 8081:8080 repository-searcher:latest
+2. Run docker container:  
+docker run --name repository-searcher -d -p 8080:8080 repository-searcher:latest
  
-3. If you want to close the application, stop and delete container:
+3. If you want to close the application, stop and delete container:  
 docker rm -f repository-searcher
 
 ## How to run using Intellij IDEA?
@@ -28,7 +28,7 @@ git clone https://github.com/DArchala/repository-searcher.git
 
 2. Download and install jdk-21
  
-3. Download and install apache-maven-3.8.5
+3. Download and install apache-maven, version 3.8.5 or newer
 
 4. Find java class in project:  
 src/main/java/pl/archala/repositorysearcher/RepositorySearcherApplication.java
