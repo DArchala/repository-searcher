@@ -4,6 +4,7 @@ import lombok.Getter;
 import pl.archala.repositorysearcher.dto.UserRepoDTO;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 public class GithubUser {
@@ -12,6 +13,6 @@ public class GithubUser {
 
     public GithubUser(String name, List<UserRepoDTO> userRepoDTOS) {
         this.ownerLogin = name;
-        this.repositories = userRepoDTOS.stream().filter(r -> !r.fork()).map(Repository::new).toList();
+        this.repositories = userRepoDTOS.stream().filter(r -> !r.fork()).map(Repository::new).collect(Collectors.toList());
     }
 }

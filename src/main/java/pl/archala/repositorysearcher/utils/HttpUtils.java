@@ -5,12 +5,20 @@ import java.net.http.HttpRequest;
 
 public final class HttpUtils {
 
-    public static final String USER_REPOSITORIES_URL_TEMPLATE = "https://api.github.com/users/%s/repos";
-    public static final String REPOSITORY_BRANCHES_URL_TEMPLATE = "https://api.github.com/repos/%s/%s/branches";
+    private static final String USER_REPOSITORIES_URL_TEMPLATE = "https://api.github.com/users/%s/repos";
+    private static final String REPOSITORY_BRANCHES_URL_TEMPLATE = "https://api.github.com/repos/%s/%s/branches";
 
-    public static HttpRequest getHttpRequest(String url, String... params) {
+    public static HttpRequest getUserReposHttpRequest(String username) {
+        return getHttpRequestByUri(URI.create(String.format(USER_REPOSITORIES_URL_TEMPLATE, username)));
+    }
+
+    public static HttpRequest getReposBranchesHttpRequest(String username, String repository) {
+        return getHttpRequestByUri(URI.create(String.format(REPOSITORY_BRANCHES_URL_TEMPLATE, username, repository)));
+    }
+
+    private static HttpRequest getHttpRequestByUri(URI uri) {
         return HttpRequest.newBuilder()
-                .uri(URI.create(String.format(url, params)))
+                .uri(uri)
                 .GET()
                 .build();
     }
