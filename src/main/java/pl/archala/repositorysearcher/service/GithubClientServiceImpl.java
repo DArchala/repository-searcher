@@ -53,7 +53,7 @@ public class GithubClientServiceImpl implements GithubClientService {
 
     private void completeUserBranches(GithubUser user) throws InternalServerException {
         for (Repository repository : user.getRepositories()) {
-            HttpRequest request = HttpUtils.getHttpRequest(REPOSITORY_BRANCHES_URL_TEMPLATE, user.getName(), repository.getName());
+            HttpRequest request = HttpUtils.getHttpRequest(REPOSITORY_BRANCHES_URL_TEMPLATE, user.getOwnerLogin(), repository.getName());
             HttpResponse<String> response = getRequestResponse(request);
 
             List<BranchDTO> branchDTOS = Arrays.asList(gson.fromJson(response.body(), BranchDTO[].class));

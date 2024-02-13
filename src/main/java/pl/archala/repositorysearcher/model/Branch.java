@@ -1,16 +1,12 @@
 package pl.archala.repositorysearcher.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 import pl.archala.repositorysearcher.dto.BranchDTO;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
 public class Branch {
-    private String name;
-    private String lastCommitSha;
+    private final String name;
+    private final String lastCommitSha;
 
     public Branch(BranchDTO branchDTO) {
         this.name = branchDTO.name();
