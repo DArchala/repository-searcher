@@ -3,6 +3,7 @@ package pl.archala.repositorysearcher.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +23,7 @@ public class GithubBranchesController {
 
     private final GithubClientService githubClientService;
 
-    @GetMapping
+    @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GithubUser> findUserBranches(@Valid @NotBlank(message = "Username must not be blank") @RequestParam String username) throws InternalServerException, GithubUserNotFoundException {
         GithubUser githubUser = githubClientService.findBranchesByUsername(username);
         return ResponseEntity.ok(githubUser);

@@ -9,7 +9,7 @@
 3. Hibernate
 4. JUnit 5
 5. Maven
-
+6. Docker
 ## How to run using Docker?
 
 1. Build docker image:  
@@ -34,3 +34,7 @@ git clone https://github.com/DArchala/repository-searcher.git
 src/main/java/pl/archala/repositorysearcher/RepositorySearcherApplication.java
 
 5. Run main method
+
+## How to communicate?
+GET localhost:8080/api/branches  
+request parameter: username (String)
