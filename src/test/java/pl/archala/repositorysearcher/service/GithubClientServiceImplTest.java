@@ -24,7 +24,8 @@ class GithubClientServiceImplTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private final Gson gson = new GsonBuilder().create();
+    @Autowired
+    private Gson gson;
 
     @Test
     public void shouldReturnCorrectGithubUserBranchesData1() throws Exception {
@@ -32,7 +33,7 @@ class GithubClientServiceImplTest {
         String username = "DITAS-PROJECT";
 
         //when
-        MvcResult mvcResult = mockMvc.perform(get("/api/branches")
+        MvcResult mvcResult = mockMvc.perform(get("/api/repositories")
                         .param("username", username)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is(200))
@@ -56,7 +57,7 @@ class GithubClientServiceImplTest {
         String username = "notExistingGithubUser";
 
         //when
-        MvcResult mvcResult = mockMvc.perform(get("/api/branches")
+        MvcResult mvcResult = mockMvc.perform(get("/api/repositories")
                         .param("username", username)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andReturn();

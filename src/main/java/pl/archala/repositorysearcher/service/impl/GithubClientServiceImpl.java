@@ -1,7 +1,7 @@
 package pl.archala.repositorysearcher.service.impl;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.archala.repositorysearcher.dto.UserRepoDTO;
 import pl.archala.repositorysearcher.exception.GithubUserNotFoundException;
@@ -23,18 +23,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 @Service
+@RequiredArgsConstructor
 public class GithubClientServiceImpl implements GithubClientService {
 
     private final HttpRequestExecutor httpRequestExecutor;
     private final Gson gson;
 
-    public GithubClientServiceImpl(HttpRequestExecutor httpRequestExecutor) {
-        this.httpRequestExecutor = httpRequestExecutor;
-        this.gson = new GsonBuilder().create();
-    }
-
     @Override
-    public GithubUser findBranchesByUsername(String username) throws GithubUserNotFoundException, InternalServerException {
+    public GithubUser findRepositoriesByUsername(String username) throws GithubUserNotFoundException, InternalServerException {
         GithubUser githubUser = findUserByName(username);
         completeUserBranches(githubUser);
         return githubUser;

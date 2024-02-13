@@ -18,14 +18,14 @@ import pl.archala.repositorysearcher.service.GithubClientService;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/branches")
-public class GithubBranchesController {
+@RequestMapping("/api/repositories")
+public class GithubRepositoriesController {
 
     private final GithubClientService githubClientService;
 
     @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GithubUser> findUserBranches(@Valid @NotBlank(message = "Username must not be blank") @RequestParam String username) throws InternalServerException, GithubUserNotFoundException {
-        GithubUser githubUser = githubClientService.findBranchesByUsername(username);
+    public ResponseEntity<GithubUser> findUserRepositories(@Valid @NotBlank(message = "Username must not be blank") @RequestParam String username) throws InternalServerException, GithubUserNotFoundException {
+        GithubUser githubUser = githubClientService.findRepositoriesByUsername(username);
         return ResponseEntity.ok(githubUser);
     }
 }
