@@ -16,20 +16,20 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(GithubUserNotFoundException.class)
     public ResponseEntity<ResponseError> handleGithubUserNotFoundException(GithubUserNotFoundException e) {
-        ResponseError error = new ResponseError(NOT_FOUND, e.getMessage());
-        return ResponseEntity.status(error.status().value()).body(error);
+        return getResponseEntityFromError(new ResponseError(NOT_FOUND, e.getMessage()));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ResponseError> handleConstraintViolationException(ConstraintViolationException e) {
-        ResponseError error = new ResponseError(BAD_REQUEST, e.getConstraintViolations().iterator().next().getMessageTemplate());
-        return ResponseEntity.status(error.status().value()).body(error);
+        return getResponseEntityFromError(new ResponseError(BAD_REQUEST, e.getConstraintViolations().iterator().next().getMessageTemplate()));
     }
 
     @ExceptionHandler(InternalServerException.class)
     public ResponseEntity<ResponseError> handleInternalServerException(InternalServerException e) {
-        ResponseError error = new ResponseError(INTERNAL_SERVER_ERROR, e.getMessage());
-        return ResponseEntity.status(error.status().value()).body(error);
+        return getResponseEntityFromError(new ResponseError(INTERNAL_SERVER_ERROR, e.getMessage()));
     }
 
+    private ResponseEntity<ResponseError> getResponseEntityFromError(ResponseError responseError) {
+        return ResponseEntity.status(responseError.status().value()).body(responseError);
+    }
 }
