@@ -64,7 +64,7 @@ public class GithubClientServiceImpl implements GithubClientService {
     private HttpResponse<String> getRequestResponse(HttpRequest request) throws InternalServerException {
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (HttpStatusCode.valueOf(response.statusCode()).is5xxServerError()) {
+            if (response.statusCode() != 404 && HttpStatusCode.valueOf(response.statusCode()).isError()) {
                 throw new InternalServerException("Error occurred during sending request: " + response.body());
             }
             return response;

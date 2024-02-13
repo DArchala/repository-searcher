@@ -6,5 +6,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public record UserRepoDTO(
         String name,
         boolean fork,
-        OwnerDTO ownerDTO) {
+        OwnerDTO owner) {
 }
