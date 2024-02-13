@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import pl.archala.repositorysearcher.model.GithubUser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,35 +29,40 @@ class GithubClientServiceImplTest {
     @Test
     public void shouldReturnCorrectGithubUserBranchesData1() throws Exception {
         //given
-        String username = "ripienaar";
+        String username = "DITAS-PROJECT";
 
         //when
-        MvcResult mvcGithubUser = mockMvc.perform(get("/api/branches")
+        MvcResult mvcResult = mockMvc.perform(get("/api/branches")
                         .param("username", username)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is(200)).andReturn();
+                .andExpect(status().is(200))
+                .andReturn();
 
-        GithubUser githubUser = gson.fromJson(mvcGithubUser.getResponse().getContentAsString(), GithubUser.class);
+        GithubUser user = gson.fromJson(mvcResult.getResponse().getContentAsString(), GithubUser.class);
 
         //then
-        assertNotNull(githubUser);
+        assertNotNull(user);
+        assertEquals(29, user.getRepositories().size());
+        assertEquals("DITAS-PROJECT", user.getOwnerLogin());
+        assertEquals(26, user.getRepositories().getFirst().getBranches().size());
+        assertEquals("application-requirements-interface", user.getRepositories().getFirst().getName());
 
     }
 
     @SneakyThrows
     @Test
-    public void shouldReturnUserNotFoundInfo() {
+    public void shouldReturnUserNotFoundInfoIfGithubUserDoesNotExist() {
         //given
         String username = "notExistingGithubUser";
 
         //when
-        mockMvc.perform(get("/api/branches")
+        MvcResult mvcResult = mockMvc.perform(get("/api/branches")
                         .param("username", username)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is(404));
+                .andReturn();
 
         //then
-
+        assertEquals(404, mvcResult.getResponse().getStatus());
 
     }
 }
