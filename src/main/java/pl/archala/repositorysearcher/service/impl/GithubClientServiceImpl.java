@@ -32,7 +32,7 @@ public class GithubClientServiceImpl implements GithubClientService {
     @Override
     public GithubUser findRepositoriesByUsername(String username) throws GithubUserNotFoundException, InternalServerException {
         GithubUser githubUser = findUserByName(username);
-        completeUserBranches(githubUser);
+        fillInUserBranches(githubUser);
         return githubUser;
     }
 
@@ -46,12 +46,12 @@ public class GithubClientServiceImpl implements GithubClientService {
         return new GithubUser(username, Arrays.asList(gson.fromJson(response.body(), UserRepoDTO[].class)));
     }
 
-    private void completeUserBranches(GithubUser user) throws InternalServerException {
+    private void fillInUserBranches(GithubUser user) throws InternalServerException {
         try (ExecutorService e = Executors.newVirtualThreadPerTaskExecutor()) {
             List<RepositoryFiller> tasks = user.getRepositories().stream().map(repo -> new RepositoryFiller(httpRequestExecutor, gson, user.getOwnerLogin(), repo)).toList();
             user.getRepositories().clear();
-            for (Future<Repository> result : e.invokeAll(tasks)) {
-                user.getRepositories().add(result.get());
+            for (Future<Repository> repository : e.invokeAll(tasks)) {
+                user.getRepositories().add(repository.get());
             }
         } catch (InterruptedException | ExecutionException e) {
             throw new InternalServerException(e.getMessage());
