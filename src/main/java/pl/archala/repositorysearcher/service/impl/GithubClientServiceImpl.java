@@ -10,15 +10,17 @@ import pl.archala.repositorysearcher.exception.checked.RepositoriesNotFoundExcep
 import pl.archala.repositorysearcher.exception.checked.InternalServerException;
 import pl.archala.repositorysearcher.exception.unchecked.UserNotFoundRuntimeException;
 import pl.archala.repositorysearcher.exception.unchecked.InternalServerRuntimeException;
-import pl.archala.repositorysearcher.model.Branch;
+import pl.archala.repositorysearcher.mappers.DtoMapper;
 import pl.archala.repositorysearcher.model.GithubUser;
 import pl.archala.repositorysearcher.model.Repository;
 import pl.archala.repositorysearcher.service.GithubClientService;
 import pl.archala.repositorysearcher.typeReferences.BranchDTOType;
 import pl.archala.repositorysearcher.typeReferences.RepositoryDTOType;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static pl.archala.repositorysearcher.handlers.RestClientExceptionProvider.throwInternalServerException;
+import static pl.archala.repositorysearcher.handlers.RestClientExceptionProvider.throwUserNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -40,19 +42,14 @@ public class GithubClientServiceImpl implements GithubClientService {
         } catch (InternalServerRuntimeException e) {
             throw new InternalServerException(e.getMessage());
         }
-
     }
 
     private GithubUser findByUsername(String username) throws RepositoriesNotFoundException {
         List<RepositoryDTO> repositoryDTOS = restClient.get()
                 .uri(USER_REPOSITORIES_URL.formatted(username))
                 .retrieve()
-                .onStatus(code -> code.value() == 404, (request, response) -> {
-                    throw new UserNotFoundRuntimeException(USER_DOES_NOT_EXIST.formatted(username));
-                })
-                .onStatus(HttpStatusCode::isError, (request, response) -> {
-                    throw new InternalServerRuntimeException(response.getStatusText());
-                })
+                .onStatus(code -> code.value() == 404, throwUserNotFoundException(USER_DOES_NOT_EXIST.formatted(username)))
+                .onStatus(HttpStatusCode::isError, throwInternalServerException())
                 .body(new RepositoryDTOType());
 
         if (repositoryDTOS.isEmpty()) {
@@ -61,7 +58,7 @@ public class GithubClientServiceImpl implements GithubClientService {
 
         List<Repository> repositories = repositoryDTOS.stream()
                 .filter(repoDTO -> !repoDTO.fork())
-                .map(repoDTO -> new Repository(repoDTO.name(), repoDTO.fork(), new ArrayList<>()))
+                .map(DtoMapper::toRepository)
                 .peek(repository -> putBranches(repository, username))
                 .toList();
         return new GithubUser(username, repositories);
@@ -73,7 +70,7 @@ public class GithubClientServiceImpl implements GithubClientService {
                 .retrieve()
                 .body(new BranchDTOType())
                 .stream()
-                .map(branchDTO -> new Branch(branchDTO.name(), branchDTO.commit().sha()))
+                .map(DtoMapper::toBranch)
                 .forEach(branch -> repository.branches().add(branch));
     }
 
