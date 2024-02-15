@@ -1,61 +1,49 @@
 package pl.archala.repositorysearcher.service.impl;
 
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
-import pl.archala.repositorysearcher.dto.UserRepoDTO;
-import pl.archala.repositorysearcher.exception.GithubUserNotFoundException;
-import pl.archala.repositorysearcher.exception.InternalServerException;
+import org.springframework.web.client.RestClient;
+import pl.archala.repositorysearcher.model.Branch;
 import pl.archala.repositorysearcher.model.GithubUser;
 import pl.archala.repositorysearcher.model.Repository;
 import pl.archala.repositorysearcher.service.GithubClientService;
-import pl.archala.repositorysearcher.task.RepositoryFiller;
-import pl.archala.repositorysearcher.utils.HttpRequestExecutor;
-import pl.archala.repositorysearcher.utils.HttpUtils;
+import pl.archala.repositorysearcher.typeReferences.BranchDTOType;
+import pl.archala.repositorysearcher.typeReferences.UserRepoDTOType;
 
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 @Service
 @RequiredArgsConstructor
+@EnableAsync
 public class GithubClientServiceImpl implements GithubClientService {
 
-    private final HttpRequestExecutor httpRequestExecutor;
-    private final Gson gson;
+    private static final String USER_REPOSITORIES_URL_TEMPLATE = "https://api.github.com/users/%s/repos";
+    private static final String REPOSITORY_BRANCHES_URL_TEMPLATE = "https://api.github.com/repos/%s/%s/branches";
+
+    private final RestClient restClient;
 
     @Override
-    public GithubUser findRepositoriesByUsername(String username) throws GithubUserNotFoundException, InternalServerException {
-        GithubUser githubUser = findUserByName(username);
-        fillInUserBranches(githubUser);
-        return githubUser;
+    public GithubUser findUserRepositories(String username) {
+        List<Repository> repositories = restClient.get()
+                .uri(USER_REPOSITORIES_URL_TEMPLATE.formatted(username))
+                .retrieve()
+                .body(new UserRepoDTOType()).stream()
+                .filter(repoDTO -> !repoDTO.fork())
+                .map(r -> new Repository(r.name(), r.fork(), new ArrayList<>()))
+                .peek(repository -> fillRepository(repository, username))
+                .toList();
+        return new GithubUser(username, repositories);
     }
 
-    private GithubUser findUserByName(String username) throws GithubUserNotFoundException, InternalServerException {
-        HttpRequest request = HttpUtils.getUserReposHttpRequest(username);
-        HttpResponse<String> response = httpRequestExecutor.getResponse(request);
-        if (response.statusCode() == 404) {
-            throw new GithubUserNotFoundException(username);
-        }
-
-        return new GithubUser(username, Arrays.asList(gson.fromJson(response.body(), UserRepoDTO[].class)));
-    }
-
-    private void fillInUserBranches(GithubUser user) throws InternalServerException {
-        try (ExecutorService e = Executors.newVirtualThreadPerTaskExecutor()) {
-            List<RepositoryFiller> tasks = user.getRepositories().stream().map(repo -> new RepositoryFiller(httpRequestExecutor, gson, user.getOwnerLogin(), repo)).toList();
-            user.getRepositories().clear();
-            for (Future<Repository> repository : e.invokeAll(tasks)) {
-                user.getRepositories().add(repository.get());
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            throw new InternalServerException(e.getMessage());
-        }
+    private void fillRepository(Repository repository, String username) {
+        restClient.get()
+                .uri(REPOSITORY_BRANCHES_URL_TEMPLATE.formatted(username, repository.name()))
+                .retrieve()
+                .body(new BranchDTOType()).stream()
+                .map(branchDTO -> new Branch(branchDTO.name(), branchDTO.commit().sha()))
+                .forEach(branch -> repository.branches().add(branch));
     }
 
 }

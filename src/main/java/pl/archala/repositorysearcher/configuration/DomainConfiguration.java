@@ -1,24 +1,15 @@
 package pl.archala.repositorysearcher.configuration;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.net.http.HttpClient;
+import org.springframework.web.client.RestClient;
 
 @Configuration
 public class DomainConfiguration {
 
     @Bean
-    public Gson gson() {
-        return new GsonBuilder().create();
+    public RestClient restClient() {
+        return RestClient.create();
     }
 
-    @Bean
-    public HttpClient httpClient() {
-        return HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_2)
-                .build();
-    }
 }

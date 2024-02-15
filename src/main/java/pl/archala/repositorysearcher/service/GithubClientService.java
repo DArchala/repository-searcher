@@ -6,6 +6,6 @@ import pl.archala.repositorysearcher.model.GithubUser;
 
 public interface GithubClientService {
 
-    GithubUser findRepositoriesByUsername(String username) throws GithubUserNotFoundException, InternalServerException;
+    GithubUser findUserRepositories(String username) throws GithubUserNotFoundException, InternalServerException;
 
 }
