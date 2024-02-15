@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import pl.archala.repositorysearcher.exception.checked.UserNotFoundException;
-import pl.archala.repositorysearcher.exception.checked.RepositoriesNotFoundException;
-import pl.archala.repositorysearcher.exception.checked.InternalServerException;
+import pl.archala.repositorysearcher.exception.UserNotFoundException;
+import pl.archala.repositorysearcher.exception.RepositoriesNotFoundException;
+import pl.archala.repositorysearcher.exception.InternalServerException;
 import pl.archala.repositorysearcher.model.GithubUser;
 import pl.archala.repositorysearcher.service.GithubClientService;
 

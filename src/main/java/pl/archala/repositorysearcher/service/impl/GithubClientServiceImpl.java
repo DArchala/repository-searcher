@@ -1,15 +1,13 @@
 package pl.archala.repositorysearcher.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import pl.archala.repositorysearcher.dto.RepositoryDTO;
-import pl.archala.repositorysearcher.exception.checked.UserNotFoundException;
-import pl.archala.repositorysearcher.exception.checked.RepositoriesNotFoundException;
-import pl.archala.repositorysearcher.exception.checked.InternalServerException;
-import pl.archala.repositorysearcher.exception.unchecked.UserNotFoundRuntimeException;
-import pl.archala.repositorysearcher.exception.unchecked.InternalServerRuntimeException;
+import pl.archala.repositorysearcher.exception.InternalServerException;
+import pl.archala.repositorysearcher.exception.RepositoriesNotFoundException;
+import pl.archala.repositorysearcher.exception.UserNotFoundException;
 import pl.archala.repositorysearcher.mappers.DtoMapper;
 import pl.archala.repositorysearcher.model.GithubUser;
 import pl.archala.repositorysearcher.model.Repository;
@@ -18,9 +16,6 @@ import pl.archala.repositorysearcher.typeReferences.BranchDTOType;
 import pl.archala.repositorysearcher.typeReferences.RepositoryDTOType;
 
 import java.util.List;
-
-import static pl.archala.repositorysearcher.handlers.RestClientExceptionProvider.throwInternalServerException;
-import static pl.archala.repositorysearcher.handlers.RestClientExceptionProvider.throwUserNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +32,11 @@ public class GithubClientServiceImpl implements GithubClientService {
     public GithubUser findUserRepositories(String username) throws UserNotFoundException, InternalServerException, RepositoriesNotFoundException {
         try {
             return findByUsername(username);
-        } catch (UserNotFoundRuntimeException e) {
-            throw new UserNotFoundException(e.getMessage());
-        } catch (InternalServerRuntimeException e) {
-            throw new InternalServerException(e.getMessage());
+        } catch (HttpClientErrorException e) {
+            switch (e.getStatusCode().value()) {
+                case 404 -> throw new UserNotFoundException(USER_DOES_NOT_EXIST.formatted(username));
+                default -> throw new InternalServerException(e.getMessage());
+            }
         }
     }
 
@@ -48,8 +44,6 @@ public class GithubClientServiceImpl implements GithubClientService {
         List<RepositoryDTO> repositoryDTOS = restClient.get()
                 .uri(USER_REPOSITORIES_URL.formatted(username))
                 .retrieve()
-                .onStatus(code -> code.value() == 404, throwUserNotFoundException(USER_DOES_NOT_EXIST.formatted(username)))
-                .onStatus(HttpStatusCode::isError, throwInternalServerException())
                 .body(new RepositoryDTOType());
 
         if (repositoryDTOS.isEmpty()) {

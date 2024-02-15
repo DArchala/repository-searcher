@@ -5,9 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import pl.archala.repositorysearcher.exception.checked.UserNotFoundException;
-import pl.archala.repositorysearcher.exception.checked.RepositoriesNotFoundException;
-import pl.archala.repositorysearcher.exception.checked.InternalServerException;
+import pl.archala.repositorysearcher.exception.UserNotFoundException;
+import pl.archala.repositorysearcher.exception.RepositoriesNotFoundException;
+import pl.archala.repositorysearcher.exception.InternalServerException;
 import pl.archala.repositorysearcher.model.ResponseError;
 
 import static org.springframework.http.HttpStatus.*;

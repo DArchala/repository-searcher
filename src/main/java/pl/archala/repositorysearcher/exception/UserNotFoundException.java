@@ -1,4 +1,4 @@
-package pl.archala.repositorysearcher.exception.checked;
+package pl.archala.repositorysearcher.exception;
 
 public class UserNotFoundException extends Exception {
 
