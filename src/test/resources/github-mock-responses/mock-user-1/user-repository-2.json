@@ -1,0 +1,10 @@
+[
+  {
+    "name": "develop",
+    "commit": {
+      "sha": "abc95eaa35989277c626d09849511c42b5b891ee",
+      "url": "https://api.github.com/repos/PolskaBot/PolskaBotFade/commits/abc95eaa35989277c626d09849511c42b5b891ee"
+    },
+    "protected": false
+  }
+]
