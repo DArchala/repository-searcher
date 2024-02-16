@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static java.lang.StringTemplate.STR;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -32,22 +31,22 @@ class GithubClientServiceImplTest {
     @Test
     public void shouldReturnGithubUser1() {
         //given
-        String userPath = STR."\{basePath}/mock-user-1";
+        String userPath = "%s/mock-user-1".formatted(basePath);
         String username = "PolskaBot";
 
-        String userJsonContent = IOUtils.resourceToString(STR."\{userPath}/user.json", StandardCharsets.UTF_8);
-        String repo1JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-1.json", StandardCharsets.UTF_8);
-        String repo2JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-2.json", StandardCharsets.UTF_8);
-        String repo3JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-3.json", StandardCharsets.UTF_8);
+        String userJsonContent = IOUtils.resourceToString("%s/user.json".formatted(userPath), StandardCharsets.UTF_8);
+        String repo1JsonContent = IOUtils.resourceToString("%s/user-repository-1.json".formatted(userPath), StandardCharsets.UTF_8);
+        String repo2JsonContent = IOUtils.resourceToString("%s/user-repository-2.json".formatted(userPath), StandardCharsets.UTF_8);
+        String repo3JsonContent = IOUtils.resourceToString("%s/user-repository-3.json".formatted(userPath), StandardCharsets.UTF_8);
 
         String repo1 = "PolskaBotCore";
         String repo2 = "PolskaBotFade";
         String repo3 = "PolskaBotRemote";
 
-        String userUrl = STR."/users/\{username}/repos";
-        String repo1Url = STR."/repos/\{username}/\{repo1}/branches";
-        String repo2Url = STR."/repos/\{username}/\{repo2}/branches";
-        String repo3Url = STR."/repos/\{username}/\{repo3}/branches";
+        String userUrl = "/users/%s/repos".formatted(username);
+        String repo1Url = "/repos/%s/%s/branches".formatted(username, repo1);
+        String repo2Url = "/repos/%s/%s/branches".formatted(username, repo2);
+        String repo3Url = "/repos/%s/%s/branches".formatted(username, repo3);
 
         //when
         stub(userUrl, 200, userJsonContent);
@@ -89,24 +88,24 @@ class GithubClientServiceImplTest {
         //given
         String username = "VikAnt8";
 
-        String userPath = STR."\{basePath}/mock-user-2";
+        String userPath = "%s/mock-user-2".formatted(basePath);
 
-        String userJsonContent = IOUtils.resourceToString(STR."\{userPath}/user.json", StandardCharsets.UTF_8);
-        String repo1JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-1.json", StandardCharsets.UTF_8);
-        String repo2JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-2.json", StandardCharsets.UTF_8);
-        String repo3JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-3.json", StandardCharsets.UTF_8);
-        String repo4JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-4.json", StandardCharsets.UTF_8);
+        String userJsonContent = IOUtils.resourceToString("%s/user.json".formatted(userPath), StandardCharsets.UTF_8);
+        String repo1JsonContent = IOUtils.resourceToString("%s/user-repository-1.json".formatted(userPath), StandardCharsets.UTF_8);
+        String repo2JsonContent = IOUtils.resourceToString("%s/user-repository-2.json".formatted(userPath), StandardCharsets.UTF_8);
+        String repo3JsonContent = IOUtils.resourceToString("%s/user-repository-3.json".formatted(userPath), StandardCharsets.UTF_8);
+        String repo4JsonContent = IOUtils.resourceToString("%s/user-repository-4.json".formatted(userPath), StandardCharsets.UTF_8);
 
         String repo1 = "Fishhub";
         String repo2 = "FlickrTestApp";
         String repo3 = "IndependenceDay";
         String repo4 = "PolskaVisa";
 
-        String userUrl = STR."/users/\{username}/repos";
-        String repo1Url = STR."/repos/\{username}/\{repo1}/branches";
-        String repo2Url = STR."/repos/\{username}/\{repo2}/branches";
-        String repo3Url = STR."/repos/\{username}/\{repo3}/branches";
-        String repo4Url = STR."/repos/\{username}/\{repo4}/branches";
+        String userUrl = "/users/%s/repos".formatted(username);
+        String repo1Url = "/repos/%s/%s/branches".formatted(username, repo1);
+        String repo2Url = "/repos/%s/%s/branches".formatted(username, repo2);
+        String repo3Url = "/repos/%s/%s/branches".formatted(username, repo3);
+        String repo4Url = "/repos/%s/%s/branches".formatted(username, repo4);
 
         //when
         stub(userUrl, 200, userJsonContent);
@@ -153,7 +152,7 @@ class GithubClientServiceImplTest {
     public void shouldThrowRepositoriesNotFoundException() {
         //given
         String username = "userWithoutRepositories";
-        String url = STR."/users/\{username}/repos";
+        String url = "/users/%s/repos".formatted(username);
 
         //when
         stub(url, 200, "[]");
@@ -167,8 +166,8 @@ class GithubClientServiceImplTest {
     public void shouldThrowGithubUserNotFoundException() {
         //given
         String username = "notExistingUserName";
-        String userNotFoundJsonContent = IOUtils.resourceToString(STR."\{basePath}/user-not-found.json", StandardCharsets.UTF_8);
-        String url = STR."/users/\{username}/repos";
+        String userNotFoundJsonContent = IOUtils.resourceToString("%s/user-not-found.json".formatted(basePath), StandardCharsets.UTF_8);
+        String url = "/users/%s/repos".formatted(username);
 
         //when
         stub(url, 404, userNotFoundJsonContent);

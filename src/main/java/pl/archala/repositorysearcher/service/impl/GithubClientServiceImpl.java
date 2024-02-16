@@ -31,7 +31,7 @@ public class GithubClientServiceImpl implements GithubClientService {
             return findByUsername(username);
         } catch (HttpClientErrorException e) {
             switch (e.getStatusCode().value()) {
-                case 404 -> throw new UserNotFoundException(STR."User with name \{username} does not exist.");
+                case 404 -> throw new UserNotFoundException("User with name %s does not exist.".formatted(username));
                 default -> throw new InternalServerException(e.getMessage());
             }
         }
@@ -39,7 +39,7 @@ public class GithubClientServiceImpl implements GithubClientService {
 
     private GithubUser findByUsername(String username) throws RepositoriesNotFoundException {
         List<Repository> repositories = restClient.get()
-                .uri(STR."\{githubUrl}/users/\{username}/repos")
+                .uri("%s/users/%s/repos".formatted(githubUrl, username))
                 .retrieve()
                 .body(new RepositoryDTOType())
                 .stream()
@@ -49,7 +49,7 @@ public class GithubClientServiceImpl implements GithubClientService {
                 .toList();
 
         if (repositories.isEmpty()) {
-            throw new RepositoriesNotFoundException(STR."User with name \{username} does not have any repositories.");
+            throw new RepositoriesNotFoundException("User with name %s does not have any repositories.".formatted(username));
         }
 
         return new GithubUser(username, repositories);
@@ -57,7 +57,7 @@ public class GithubClientServiceImpl implements GithubClientService {
 
     private void putBranches(Repository repository, String username) {
         restClient.get()
-                .uri(STR."\{githubUrl}/repos/\{username}/\{repository.name()}/branches")
+                .uri("%s/repos/%s/%s/branches".formatted(githubUrl, username, repository.name()))
                 .retrieve()
                 .body(new BranchDTOType())
                 .stream()

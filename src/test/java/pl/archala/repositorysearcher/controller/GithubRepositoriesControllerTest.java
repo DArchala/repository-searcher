@@ -39,7 +39,7 @@ class GithubRepositoriesControllerTest {
     void shouldReturnGithubUser() {
         //given
         String username = "PolskaBot";
-        String expectedJsonPath = STR."\{baseUrl}/user-with-repositories.json";
+        String expectedJsonPath = "%s/user-with-repositories.json".formatted(baseUrl);
         String expectedJsonContent = IOUtils.resourceToString(expectedJsonPath, StandardCharsets.UTF_8);
 
         List<Repository> repositories = List.of(new Repository("PolskaBotCore", false, List.of(new Branch("develop", "3d6738f7811424e1c9047c09f1b6b17511f90f20"))),
@@ -67,8 +67,8 @@ class GithubRepositoriesControllerTest {
     public void shouldReturnUserNotFoundErrorResponse() {
         //given
         String username = "notExistingUser";
-        String exceptionMessage = STR."User with name \{username} does not exist.";
-        String expectedJsonPath = STR."\{baseUrl}/user-not-found-error.json";
+        String exceptionMessage = "User with name %s does not exist.".formatted(username);
+        String expectedJsonPath = "%s/user-not-found-error.json".formatted(baseUrl);
         String expectedJsonContent = IOUtils.resourceToString(expectedJsonPath, StandardCharsets.UTF_8);
 
         //when
@@ -90,8 +90,8 @@ class GithubRepositoriesControllerTest {
     public void shouldReturnRepositoriesNotFoundErrorResponse() {
         //given
         String username = "userWithNoRepository";
-        String exceptionMessage = STR."User with name \{username} does not have any repositories.";
-        String expectedJsonPath = STR."\{baseUrl}/user-has-no-repositories-error.json";
+        String exceptionMessage = "User with name %s does not have any repositories.".formatted(username);
+        String expectedJsonPath = "%s/user-has-no-repositories-error.json".formatted(baseUrl);
         String expectedJsonContent = IOUtils.resourceToString(expectedJsonPath, StandardCharsets.UTF_8);
 
         //when
