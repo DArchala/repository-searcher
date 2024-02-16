@@ -22,11 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GithubClientServiceImpl implements GithubClientService {
 
-    private static final String USER_REPOSITORIES_URL = "%s/users/%s/repos";
-    private static final String REPOSITORY_BRANCHES_URL = "%s/repos/%s/%s/branches";
-    private static final String USER_DOES_NOT_EXIST = "User with name %s does not exist.";
-    private static final String USER_REPOSITORIES_DO_NOT_EXIST = "User with name %s does not have any repositories.";
-
     @Value("${github.url}")
     private String githubUrl;
     private final RestClient restClient;
@@ -37,7 +32,7 @@ public class GithubClientServiceImpl implements GithubClientService {
             return findByUsername(username);
         } catch (HttpClientErrorException e) {
             switch (e.getStatusCode().value()) {
-                case 404 -> throw new UserNotFoundException(USER_DOES_NOT_EXIST.formatted(username));
+                case 404 -> throw new UserNotFoundException(STR."User with name \{username} does not exist.");
                 default -> throw new InternalServerException(e.getMessage());
             }
         }
@@ -45,12 +40,12 @@ public class GithubClientServiceImpl implements GithubClientService {
 
     private GithubUser findByUsername(String username) throws RepositoriesNotFoundException {
         List<RepositoryDTO> repositoryDTOS = restClient.get()
-                .uri(USER_REPOSITORIES_URL.formatted(githubUrl, username))
+                .uri(STR."\{githubUrl}/users/\{username}/repos")
                 .retrieve()
                 .body(new RepositoryDTOType());
 
         if (repositoryDTOS.isEmpty()) {
-            throw new RepositoriesNotFoundException(USER_REPOSITORIES_DO_NOT_EXIST.formatted(username));
+            throw new RepositoriesNotFoundException(STR."User with name \{username} does not have any repositories.");
         }
 
         List<Repository> repositories = repositoryDTOS.stream()
@@ -63,7 +58,7 @@ public class GithubClientServiceImpl implements GithubClientService {
 
     private void putBranches(Repository repository, String username) {
         restClient.get()
-                .uri(REPOSITORY_BRANCHES_URL.formatted(githubUrl, username, repository.name()))
+                .uri(STR."\{githubUrl}/repos/\{username}/\{repository.name()}/branches")
                 .retrieve()
                 .body(new BranchDTOType())
                 .stream()
