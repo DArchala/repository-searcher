@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import pl.archala.repositorysearcher.exception.RepositoriesNotFoundException;
 import pl.archala.repositorysearcher.exception.UserNotFoundException;
+import pl.archala.repositorysearcher.model.Branch;
 import pl.archala.repositorysearcher.model.GithubUser;
 import pl.archala.repositorysearcher.model.Repository;
 import wiremock.org.apache.commons.io.IOUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.lang.StringTemplate.STR;
@@ -24,18 +26,19 @@ class GithubClientServiceImplTest {
     @Autowired
     private GithubClientService githubClientService;
 
+    private final String basePath = "/github-mock-responses";
+
     @SneakyThrows
     @Test
     public void shouldReturnGithubUser1() {
         //given
+        String userPath = STR."\{basePath}/mock-user-1";
         String username = "PolskaBot";
 
-        String basePath = "/github-mock-responses/mock-user-1/";
-
-        String userMockJsonContent = IOUtils.resourceToString(STR."\{basePath}user.json", StandardCharsets.UTF_8);
-        String repo1MockJsonContent = IOUtils.resourceToString(STR."\{basePath}user-repository-1.json", StandardCharsets.UTF_8);
-        String repo2MockJsonContent = IOUtils.resourceToString(STR."\{basePath}user-repository-2.json", StandardCharsets.UTF_8);
-        String repo3MockJsonContent = IOUtils.resourceToString(STR."\{basePath}user-repository-3.json", StandardCharsets.UTF_8);
+        String userJsonContent = IOUtils.resourceToString(STR."\{userPath}/user.json", StandardCharsets.UTF_8);
+        String repo1JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-1.json", StandardCharsets.UTF_8);
+        String repo2JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-2.json", StandardCharsets.UTF_8);
+        String repo3JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-3.json", StandardCharsets.UTF_8);
 
         String repo1 = "PolskaBotCore";
         String repo2 = "PolskaBotFade";
@@ -47,10 +50,10 @@ class GithubClientServiceImplTest {
         String repo3Url = STR."/repos/\{username}/\{repo3}/branches";
 
         //when
-        stub(userUrl, 200, userMockJsonContent);
-        stub(repo1Url, 200, repo1MockJsonContent);
-        stub(repo2Url, 200, repo2MockJsonContent);
-        stub(repo3Url, 200, repo3MockJsonContent);
+        stub(userUrl, 200, userJsonContent);
+        stub(repo1Url, 200, repo1JsonContent);
+        stub(repo2Url, 200, repo2JsonContent);
+        stub(repo3Url, 200, repo3JsonContent);
 
         GithubUser actualGithubUser = githubClientService.findUserRepositories(username);
 
@@ -60,12 +63,24 @@ class GithubClientServiceImplTest {
         assertEquals(username, actualGithubUser.ownerLogin());
         assertEquals(3, actualGithubUser.repositories().size());
 
-        assertEquals(1, actualGithubUser.repositories().stream().filter(r -> r.name().equals(repo1)).toList().size());
-        assertEquals(1, actualGithubUser.repositories().stream().filter(r -> r.name().equals(repo2)).toList().size());
-        assertEquals(1, actualGithubUser.repositories().stream().filter(r -> r.name().equals(repo3)).toList().size());
+        Repository repository1 = assertDoesNotThrow(() -> findRepoByName(actualGithubUser.repositories(), repo1));
+        Repository repository2 = assertDoesNotThrow(() -> findRepoByName(actualGithubUser.repositories(), repo2));
+        Repository repository3 = assertDoesNotThrow(() -> findRepoByName(actualGithubUser.repositories(), repo3));
+
+        Branch branch1 = assertDoesNotThrow(() -> findBranchByName(repository1.branches(), "develop"));
+        Branch branch2 = assertDoesNotThrow(() -> findBranchByName(repository2.branches(), "develop"));
+        Branch branch3 = assertDoesNotThrow(() -> findBranchByName(repository3.branches(), "develop"));
+
+        assertEquals(1, repository1.branches().size());
+        assertEquals("3d6738f7811424e1c9047c09f1b6b17511f90f20", branch1.lastCommitSha());
+
+        assertEquals(1, repository2.branches().size());
+        assertEquals("abc95eaa35989277c626d09849511c42b5b891ee", branch2.lastCommitSha());
+
+        assertEquals(1, repository3.branches().size());
+        assertEquals("5ba55fc2d511d663b0ad8211e39b7b1eebc67261", branch3.lastCommitSha());
 
         assertTrue(actualGithubUser.repositories().stream().noneMatch(Repository::fork));
-
     }
 
     @SneakyThrows
@@ -74,13 +89,13 @@ class GithubClientServiceImplTest {
         //given
         String username = "VikAnt8";
 
-        String basePath = "/github-mock-responses/mock-user-2/";
+        String userPath = STR."\{basePath}/mock-user-2";
 
-        String userMockJsonContent = IOUtils.resourceToString(STR."\{basePath}user.json", StandardCharsets.UTF_8);
-        String repo1MockJsonContent = IOUtils.resourceToString(STR."\{basePath}user-repository-1.json", StandardCharsets.UTF_8);
-        String repo2MockJsonContent = IOUtils.resourceToString(STR."\{basePath}user-repository-2.json", StandardCharsets.UTF_8);
-        String repo3MockJsonContent = IOUtils.resourceToString(STR."\{basePath}user-repository-3.json", StandardCharsets.UTF_8);
-        String repo4MockJsonContent = IOUtils.resourceToString(STR."\{basePath}user-repository-4.json", StandardCharsets.UTF_8);
+        String userJsonContent = IOUtils.resourceToString(STR."\{userPath}/user.json", StandardCharsets.UTF_8);
+        String repo1JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-1.json", StandardCharsets.UTF_8);
+        String repo2JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-2.json", StandardCharsets.UTF_8);
+        String repo3JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-3.json", StandardCharsets.UTF_8);
+        String repo4JsonContent = IOUtils.resourceToString(STR."\{userPath}/user-repository-4.json", StandardCharsets.UTF_8);
 
         String repo1 = "Fishhub";
         String repo2 = "FlickrTestApp";
@@ -94,11 +109,11 @@ class GithubClientServiceImplTest {
         String repo4Url = STR."/repos/\{username}/\{repo4}/branches";
 
         //when
-        stub(userUrl, 200, userMockJsonContent);
-        stub(repo1Url, 200, repo1MockJsonContent);
-        stub(repo2Url, 200, repo2MockJsonContent);
-        stub(repo3Url, 200, repo3MockJsonContent);
-        stub(repo4Url, 200, repo4MockJsonContent);
+        stub(userUrl, 200, userJsonContent);
+        stub(repo1Url, 200, repo1JsonContent);
+        stub(repo2Url, 200, repo2JsonContent);
+        stub(repo3Url, 200, repo3JsonContent);
+        stub(repo4Url, 200, repo4JsonContent);
 
         GithubUser actualGithubUser = githubClientService.findUserRepositories(username);
 
@@ -108,13 +123,29 @@ class GithubClientServiceImplTest {
         assertEquals(username, actualGithubUser.ownerLogin());
         assertEquals(4, actualGithubUser.repositories().size());
 
-        assertEquals(1, actualGithubUser.repositories().stream().filter(r -> r.name().equals(repo1)).toList().size());
-        assertEquals(1, actualGithubUser.repositories().stream().filter(r -> r.name().equals(repo2)).toList().size());
-        assertEquals(1, actualGithubUser.repositories().stream().filter(r -> r.name().equals(repo3)).toList().size());
-        assertEquals(1, actualGithubUser.repositories().stream().filter(r -> r.name().equals(repo4)).toList().size());
+        Repository repository1 = assertDoesNotThrow(() -> findRepoByName(actualGithubUser.repositories(), repo1));
+        Repository repository2 = assertDoesNotThrow(() -> findRepoByName(actualGithubUser.repositories(), repo2));
+        Repository repository3 = assertDoesNotThrow(() -> findRepoByName(actualGithubUser.repositories(), repo3));
+        Repository repository4 = assertDoesNotThrow(() -> findRepoByName(actualGithubUser.repositories(), repo4));
+
+        Branch branch1 = assertDoesNotThrow(() -> findBranchByName(repository1.branches(), "master"));
+        Branch branch2 = assertDoesNotThrow(() -> findBranchByName(repository2.branches(), "master"));
+        Branch branch3 = assertDoesNotThrow(() -> findBranchByName(repository3.branches(), "master"));
+        Branch branch4 = assertDoesNotThrow(() -> findBranchByName(repository4.branches(), "master"));
+
+        assertEquals(1, repository1.branches().size());
+        assertEquals("e331c9cc1eb7a38ccaf4f01bc737f074cc402200", branch1.lastCommitSha());
+
+        assertEquals(1, repository2.branches().size());
+        assertEquals("faf56c15b0ba53a4d4d4a73a907cd164297bf2d8", branch2.lastCommitSha());
+
+        assertEquals(1, repository3.branches().size());
+        assertEquals("60fad251cdc6325f36a1e3e7e69d7ecfbbeb4cfa", branch3.lastCommitSha());
+
+        assertEquals(1, repository4.branches().size());
+        assertEquals("ecfa7b77dac1549bdee64295799ac0f2918fc02d", branch4.lastCommitSha());
 
         assertTrue(actualGithubUser.repositories().stream().noneMatch(Repository::fork));
-
     }
 
     @SneakyThrows
@@ -135,8 +166,6 @@ class GithubClientServiceImplTest {
     @Test
     public void shouldThrowGithubUserNotFoundException() {
         //given
-        String basePath = "/github-mock-responses/";
-
         String username = "notExistingUserName";
         String userNotFoundJsonContent = IOUtils.resourceToString(STR."\{basePath}/user-not-found.json", StandardCharsets.UTF_8);
         String url = STR."/users/\{username}/repos";
@@ -146,7 +175,6 @@ class GithubClientServiceImplTest {
 
         //then
         assertThrows(UserNotFoundException.class, () -> githubClientService.findUserRepositories(username));
-
     }
 
     private void stub(String url, int status, String body) {
@@ -156,7 +184,14 @@ class GithubClientServiceImplTest {
                         .withStatus(status)
                         .withBody(body)
                 ));
+    }
 
+    private Repository findRepoByName(List<Repository> repositories, String name) {
+        return repositories.stream().filter(r -> r.name().equals(name)).findAny().orElseThrow();
+    }
+
+    private Branch findBranchByName(List<Branch> branches, String name) {
+        return branches.stream().filter(b -> b.name().equals(name)).findAny().orElseThrow();
     }
 
 }
