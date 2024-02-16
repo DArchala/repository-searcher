@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
-import pl.archala.repositorysearcher.dto.RepositoryDTO;
 import pl.archala.repositorysearcher.exception.InternalServerException;
 import pl.archala.repositorysearcher.exception.RepositoriesNotFoundException;
 import pl.archala.repositorysearcher.exception.UserNotFoundException;
@@ -39,20 +38,20 @@ public class GithubClientServiceImpl implements GithubClientService {
     }
 
     private GithubUser findByUsername(String username) throws RepositoriesNotFoundException {
-        List<RepositoryDTO> repositoryDTOS = restClient.get()
+        List<Repository> repositories = restClient.get()
                 .uri(STR."\{githubUrl}/users/\{username}/repos")
                 .retrieve()
-                .body(new RepositoryDTOType());
-
-        if (repositoryDTOS.isEmpty()) {
-            throw new RepositoriesNotFoundException(STR."User with name \{username} does not have any repositories.");
-        }
-
-        List<Repository> repositories = repositoryDTOS.stream()
+                .body(new RepositoryDTOType())
+                .stream()
                 .filter(repoDTO -> !repoDTO.fork())
                 .map(DtoMapper::toRepository)
                 .peek(repository -> putBranches(repository, username))
                 .toList();
+
+        if (repositories.isEmpty()) {
+            throw new RepositoriesNotFoundException(STR."User with name \{username} does not have any repositories.");
+        }
+
         return new GithubUser(username, repositories);
     }
 
