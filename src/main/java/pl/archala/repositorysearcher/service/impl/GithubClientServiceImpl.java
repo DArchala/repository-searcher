@@ -1,6 +1,7 @@
 package pl.archala.repositorysearcher.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
@@ -21,11 +22,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GithubClientServiceImpl implements GithubClientService {
 
-    private static final String USER_REPOSITORIES_URL = "https://api.github.com/users/%s/repos";
-    private static final String REPOSITORY_BRANCHES_URL = "https://api.github.com/repos/%s/%s/branches";
+    private static final String USER_REPOSITORIES_URL = "%s/users/%s/repos";
+    private static final String REPOSITORY_BRANCHES_URL = "%s/repos/%s/%s/branches";
     private static final String USER_DOES_NOT_EXIST = "User with name %s does not exist.";
     private static final String USER_REPOSITORIES_DO_NOT_EXIST = "User with name %s does not have any repositories.";
 
+    @Value("${github.url}")
+    private String githubUrl;
     private final RestClient restClient;
 
     @Override
@@ -42,7 +45,7 @@ public class GithubClientServiceImpl implements GithubClientService {
 
     private GithubUser findByUsername(String username) throws RepositoriesNotFoundException {
         List<RepositoryDTO> repositoryDTOS = restClient.get()
-                .uri(USER_REPOSITORIES_URL.formatted(username))
+                .uri(USER_REPOSITORIES_URL.formatted(githubUrl, username))
                 .retrieve()
                 .body(new RepositoryDTOType());
 
@@ -60,7 +63,7 @@ public class GithubClientServiceImpl implements GithubClientService {
 
     private void putBranches(Repository repository, String username) {
         restClient.get()
-                .uri(REPOSITORY_BRANCHES_URL.formatted(username, repository.name()))
+                .uri(REPOSITORY_BRANCHES_URL.formatted(githubUrl, username, repository.name()))
                 .retrieve()
                 .body(new BranchDTOType())
                 .stream()
