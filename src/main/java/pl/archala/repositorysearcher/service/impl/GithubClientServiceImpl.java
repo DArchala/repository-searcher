@@ -1,7 +1,6 @@
 package pl.archala.repositorysearcher.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
@@ -16,6 +15,7 @@ import pl.archala.repositorysearcher.typeReferences.BranchDTOType;
 import pl.archala.repositorysearcher.typeReferences.RepositoryDTOType;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +36,14 @@ public class GithubClientServiceImpl implements GithubClientService {
     }
 
     private GithubUser findByUsername(String username) throws RepositoriesNotFoundException {
+        Consumer<Repository> addBranches = (repository) -> restClient.get()
+                .uri("/repos/{username}/{repository}/branches", username, repository.name())
+                .retrieve()
+                .body(new BranchDTOType())
+                .stream()
+                .map(DtoMapper::toBranch)
+                .forEach(branch -> repository.branches().add(branch));
+
         List<Repository> repositories = restClient.get()
                 .uri("/users/{username}/repos", username)
                 .retrieve()
@@ -43,7 +51,7 @@ public class GithubClientServiceImpl implements GithubClientService {
                 .stream()
                 .filter(repoDTO -> !repoDTO.fork())
                 .map(DtoMapper::toRepository)
-                .peek(repository -> putBranches(repository, username))
+                .peek(addBranches)
                 .toList();
 
         if (repositories.isEmpty()) {
@@ -53,14 +61,5 @@ public class GithubClientServiceImpl implements GithubClientService {
         return new GithubUser(username, repositories);
     }
 
-    private void putBranches(Repository repository, String username) {
-        restClient.get()
-                .uri("/repos/{username}/{repository}/branches", username, repository.name())
-                .retrieve()
-                .body(new BranchDTOType())
-                .stream()
-                .map(DtoMapper::toBranch)
-                .forEach(branch -> repository.branches().add(branch));
-    }
 
 }
