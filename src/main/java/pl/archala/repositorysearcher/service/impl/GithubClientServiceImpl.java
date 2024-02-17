@@ -21,8 +21,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GithubClientServiceImpl implements GithubClientService {
 
-    @Value("${github.url}")
-    private String githubUrl;
     private final RestClient restClient;
 
     @Override
@@ -39,7 +37,7 @@ public class GithubClientServiceImpl implements GithubClientService {
 
     private GithubUser findByUsername(String username) throws RepositoriesNotFoundException {
         List<Repository> repositories = restClient.get()
-                .uri("%s/users/%s/repos".formatted(githubUrl, username))
+                .uri("/users/{username}/repos", username)
                 .retrieve()
                 .body(new RepositoryDTOType())
                 .stream()
@@ -57,7 +55,7 @@ public class GithubClientServiceImpl implements GithubClientService {
 
     private void putBranches(Repository repository, String username) {
         restClient.get()
-                .uri("%s/repos/%s/%s/branches".formatted(githubUrl, username, repository.name()))
+                .uri("/repos/{username}/{repository}/branches", username, repository.name())
                 .retrieve()
                 .body(new BranchDTOType())
                 .stream()
