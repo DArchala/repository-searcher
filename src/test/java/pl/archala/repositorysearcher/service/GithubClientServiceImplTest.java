@@ -178,7 +178,7 @@ class GithubClientServiceImplTest {
 
     private void stub(String url, int status, String body) {
         stubFor(get(url)
-                .willReturn(ok()
+                .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(status)
                         .withBody(body)
