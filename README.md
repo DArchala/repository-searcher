@@ -42,6 +42,6 @@ src/main/java/pl/archala/repositorysearcher/RepositorySearcherApplication.java
 5. Run main method
 
 ## How to communicate?
-Method: GET
-Endpoint: /api/branches 
+Method: GET  
+Endpoint: /api/branches  
 Request parameter: username (String)
