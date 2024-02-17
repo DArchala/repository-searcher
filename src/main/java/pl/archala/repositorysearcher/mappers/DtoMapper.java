@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public final class DtoMapper {
 
     public static Repository toRepository(RepositoryDTO repositoryDTO) {
-        return new Repository(repositoryDTO.name(), repositoryDTO.fork(), new ArrayList<>());
+        return new Repository(repositoryDTO.name(), new ArrayList<>());
     }
 
     public static Branch toBranch(BranchDTO branchDTO) {

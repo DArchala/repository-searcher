@@ -4,6 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
-public record Repository(String name, @JsonIgnore boolean fork, List<Branch> branches) {
+public record Repository(String name, List<Branch> branches) {
 
 }

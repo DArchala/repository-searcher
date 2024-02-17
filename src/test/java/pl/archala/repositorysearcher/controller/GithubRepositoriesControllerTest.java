@@ -42,9 +42,9 @@ class GithubRepositoriesControllerTest {
         String expectedJsonPath = "%s/user-with-repositories.json".formatted(baseUrl);
         String expectedJsonContent = IOUtils.resourceToString(expectedJsonPath, StandardCharsets.UTF_8);
 
-        List<Repository> repositories = List.of(new Repository("PolskaBotCore", false, List.of(new Branch("develop", "3d6738f7811424e1c9047c09f1b6b17511f90f20"))),
-                new Repository("PolskaBotFade", false, List.of(new Branch("develop", "abc95eaa35989277c626d09849511c42b5b891ee"))),
-                new Repository("PolskaBotRemote", false, List.of(new Branch("develop", "5ba55fc2d511d663b0ad8211e39b7b1eebc67261"))));
+        List<Repository> repositories = List.of(new Repository("PolskaBotCore", List.of(new Branch("develop", "3d6738f7811424e1c9047c09f1b6b17511f90f20"))),
+                new Repository("PolskaBotFade", List.of(new Branch("develop", "abc95eaa35989277c626d09849511c42b5b891ee"))),
+                new Repository("PolskaBotRemote", List.of(new Branch("develop", "5ba55fc2d511d663b0ad8211e39b7b1eebc67261"))));
 
         GithubUser githubUser = new GithubUser(username, repositories);
 

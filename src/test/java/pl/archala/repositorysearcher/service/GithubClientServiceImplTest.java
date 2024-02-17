@@ -78,8 +78,6 @@ class GithubClientServiceImplTest {
 
         assertEquals(1, repository3.branches().size());
         assertEquals("5ba55fc2d511d663b0ad8211e39b7b1eebc67261", branch3.lastCommitSha());
-
-        assertTrue(actualGithubUser.repositories().stream().noneMatch(Repository::fork));
     }
 
     @SneakyThrows
@@ -143,8 +141,6 @@ class GithubClientServiceImplTest {
 
         assertEquals(1, repository4.branches().size());
         assertEquals("ecfa7b77dac1549bdee64295799ac0f2918fc02d", branch4.lastCommitSha());
-
-        assertTrue(actualGithubUser.repositories().stream().noneMatch(Repository::fork));
     }
 
     @SneakyThrows
