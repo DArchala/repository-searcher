@@ -43,5 +43,5 @@ src/main/java/pl/archala/repositorysearcher/RepositorySearcherApplication.java
 
 ## How to communicate?
 Method: GET  
-Endpoint: /api/branches  
+Endpoint: /api/repositories  
 Request parameter: username (String)
