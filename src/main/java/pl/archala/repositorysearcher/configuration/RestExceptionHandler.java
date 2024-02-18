@@ -37,8 +37,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private ResponseEntity<ResponseError> getResponseEntity(HttpStatus status, String message) {
-        ResponseError error = new ResponseError(status, message);
-        return ResponseEntity.status(error.status().value()).body(error);
+        return ResponseEntity.status(status.value()).body(new ResponseError(status, message));
     }
 
 }
